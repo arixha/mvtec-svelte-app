@@ -15,7 +15,9 @@
 	export let layout;
 
 	let datum, width, height;
-		
+	
+	console.log(width,height)
+
 	$: x = scaleTime()
 		.domain(extent(data, d => d[key.x]))
 		.range([margin.left, width - margin.right]);

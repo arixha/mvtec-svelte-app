@@ -1,11 +1,12 @@
 <script>
 	import Tooltip from '../common/Tooltip.svelte';
 	import Legend from '../common/Legend.svelte';
-
+	import {groups, extent } from 'd3-array';
 	import { feature, mesh } from 'topojson-client';
 	import { geoPath } from 'd3-geo';
 	import { get } from 'lodash'
-  	
+  	import locale from '@reuters-graphics/d3-locale';
+
     export let data;
 	export let map;
 	export let scale;
@@ -16,10 +17,17 @@
     export let projection;
     export let geo;
 	
+
+
 	let tooltipOptions, width, height;
 	
 	const land = feature(map, map.objects[geo]);
 	const border = mesh(map, map.objects[geo], (a, b) => a !== b);
+
+	// data se lo estamos pasando en app.svelte cuando creamos allí el Map 
+	// -> data = emissionsData !!!
+	console.log("hola maps");
+	console.log(data);
 
 	$: _projection = projection
 			.fitSize([width, height],land);
@@ -31,16 +39,23 @@
 		return (d !== undefined) ? scale(get(d, value)) : '#E0E0E0';
 	}
 
+
+
 	$: handleHover = (e, _id) => {
 		let x = e.offsetX;
 		let y = e.offsetY;
 		let visible = true;
 		
 		const d = data.find(d => d[join.data] === _id);
+
+		//console.log("hola maps hover " + d)
+
 		const tip = (d !== undefined)
-			? ''
-			: '';
-		tooltipOptions = {x: x, y: y, tip: tip, visible: visible}
+			? d
+			: 'No data';
+		tooltipOptions = (d !== undefined)
+			?{x: x, y: y, tip: tip, visible: visible}
+			:{x: x, y: y, tip: tip, visible: false}
 	}
 	
 	$: handleLeave = () => {
@@ -50,7 +65,7 @@
 </script>
 
 <div class='graphic {layout}' bind:clientWidth={width} bind:clientHeight={height}>
-	<svg viewBox="0 0 {width} {height}" {width} {height}>
+	<svg viewBox="0 0 {width} {height}" {width} {height} style="margin-top: 100px">
 		<g>
 			{#each land.features as feature}
 			<path 
